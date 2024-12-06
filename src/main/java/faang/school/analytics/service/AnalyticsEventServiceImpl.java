@@ -8,6 +8,7 @@ import faang.school.analytics.model.AnalyticsEvent;
 import faang.school.analytics.model.EventType;
 import faang.school.analytics.model.Interval;
 import faang.school.analytics.repository.AnalyticsEventRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class AnalyticsEventServiceImpl implements AnalyticsEventService {
 
     }
 
+    @Transactional
     @Override
     public List<AnalyticsEventDto> getAnalytics(long receiverId, EventType eventType, Interval interval, LocalDateTime from, LocalDateTime to) {
         AnalyticsEventFilterDto filters = AnalyticsEventFilterDto.builder()
