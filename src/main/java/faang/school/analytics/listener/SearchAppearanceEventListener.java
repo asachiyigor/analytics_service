@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.analytics.dto.SearchAppearanceEventDto;
 import faang.school.analytics.mapper.AnalyticsEventMapper;
 import faang.school.analytics.model.AnalyticsEvent;
-import faang.school.analytics.model.EventType;
 import faang.school.analytics.service.AnalyticsEventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +32,9 @@ public class SearchAppearanceEventListener implements MessageListener {
         SearchAppearanceEventDto event = SearchAppearanceEventDto.builder()
                 .foundUserId(inputEvent.getFoundUserId())
                 .requesterId(inputEvent.getRequesterId())
-                .requestedAt(LocalDateTime.now())
                 .build();
         AnalyticsEvent analyticsEvent = analyticsEventMapper.toEntity(event);
+        analyticsEvent.setReceivedAt(LocalDateTime.now());
         analyticsEventService.saveEvent(analyticsEvent);
     }
 }

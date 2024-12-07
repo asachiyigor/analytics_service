@@ -14,5 +14,4 @@ import java.time.LocalDateTime;
 public class SearchAppearanceEventDto {
     private Long requesterId;
     private Long foundUserId;
-    private LocalDateTime requestedAt;
 }

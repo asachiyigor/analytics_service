@@ -16,6 +16,5 @@ public interface AnalyticsEventMapper {
     @Mapping(target = "receiverId", source = "foundUserId")
     @Mapping(target = "actorId", source = "requesterId")
     @Mapping(target = "eventType", expression = "java(EventType.PROFILE_APPEARED_IN_SEARCH)")
-    @Mapping(target = "receivedAt", source = "requestedAt")
     AnalyticsEvent toEntity(SearchAppearanceEventDto searchAppearanceEventDto);
 }
