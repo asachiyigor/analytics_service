@@ -23,6 +23,7 @@ spring:
       host: localhost
       channel:
         profile-view: profile_view_channel
+        bought-premium: bought_premium_channel
 
 server:
   port: 8086
