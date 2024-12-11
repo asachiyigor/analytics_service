@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Data
@@ -16,13 +17,13 @@ import java.time.LocalDateTime;
 @Builder
 public class FundRaisedEvent {
     @NotNull
-    private Long userId;
+    private long userId;
 
     @NotNull
-    private Long amount;
+    private BigDecimal amount;
 
     private EventType eventType = EventType.POST_VIEW;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime donationTime;
 }
