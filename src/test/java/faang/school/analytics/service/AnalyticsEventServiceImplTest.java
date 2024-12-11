@@ -59,6 +59,7 @@ class AnalyticsEventServiceImplTest {
         verify(analyticsEventRepository).save(any(AnalyticsEvent.class));
         verifyNoMoreInteractions(analyticsEventRepository);
 //        fail("test failed 1");
+        System.out.println("just to push");
     }
 
     @Test
