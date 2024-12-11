@@ -61,19 +61,19 @@ class SearchAppearanceEventListenerTest {
         ArgumentCaptor<AnalyticsEvent> eventCaptor = ArgumentCaptor.forClass(AnalyticsEvent.class);
         verify(analyticsEventService).saveEvent(eventCaptor.capture());
         AnalyticsEvent savedEvent = eventCaptor.getValue();
+        verify(analyticsEventMapper).toEntity(any(SearchAppearanceEventDto.class));
         assertEquals(inputEvent.getRequesterId(), savedEvent.getActorId());
         assertEquals(inputEvent.getFoundUserId(), savedEvent.getReceiverId());
         assertNotNull(savedEvent.getReceivedAt());
-        verify(analyticsEventMapper).toEntity(any(SearchAppearanceEventDto.class));
     }
 
     @Test
     @DisplayName("When invalid JSON payload is received, should throw RuntimeException")
     void onMessage_InvalidJsonPayload_ShouldThrowRuntimeException() {
         when(message.getBody()).thenReturn(new byte[0]);
+        verify(analyticsEventService, never()).saveEvent(any());
         assertThrows(RuntimeException.class, () -> {
             listener.onMessage(message, null);
         });
-        verify(analyticsEventService, never()).saveEvent(any());
     }
 }
