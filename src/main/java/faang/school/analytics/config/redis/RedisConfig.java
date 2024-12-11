@@ -27,6 +27,9 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int port;
 
+    @Value("${spring.data.redis.channel.search-appearance-channel.name}")
+    private String searchAppearanceTopic;
+
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
@@ -46,9 +49,6 @@ public class RedisConfig {
     MessageListenerAdapter redisMessageListenerAdapter() {
         return new MessageListenerAdapter(new SearchAppearanceEventListener(analyticsEventMapper, analyticsEventService));
     }
-
-    @Value("${spring.data.redis.channel.search-appearance-channel.name}")
-    private String searchAppearanceTopic;
 
     @Bean
     public ChannelTopic searchAppearanceTopic() {
