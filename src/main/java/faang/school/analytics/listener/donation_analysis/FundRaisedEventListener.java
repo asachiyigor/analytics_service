@@ -32,13 +32,12 @@ public class FundRaisedEventListener implements MessageListener {
             AnalyticsEvent analyticsEvent = analyticsEventMapper.toEntity(event);
             analyticsEventService.saveEvent(analyticsEvent);
             log.info("Saved event to database: {}", analyticsEvent);
+            log.info("Message handling completed.");
 
         } catch (IOException e) {
             String messageBody = new String(message.getBody());
             log.error("Failed to parse event: {}", messageBody, e);
             throw new RuntimeException("Error parsing FundRaisedEvent", e);
-        } finally {
-            log.info("Message handling completed.");
         }
     }
 }
