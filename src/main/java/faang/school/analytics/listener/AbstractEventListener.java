@@ -16,7 +16,6 @@ import java.util.function.Consumer;
 public abstract class AbstractEventListener<T> {
     private final String channelName;
     private final ObjectMapper objectMapper;
-    protected final UserServiceClient userServiceClient;
 
     protected void handleEvent(Message message, Class<T> eventClass, Consumer<T> consumer) {
         try {
