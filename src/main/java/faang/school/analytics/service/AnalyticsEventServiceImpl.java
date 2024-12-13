@@ -27,10 +27,10 @@ public class AnalyticsEventServiceImpl implements AnalyticsEventService {
     private final AnalyticsEventRepository analyticsEventRepository;
 
     @Override
-    public void saveEvent(AnalyticsEvent event) {
-        analyticsEventRepository.save(event);
+    public AnalyticsEvent saveEvent(AnalyticsEvent event) {
+        AnalyticsEvent savedEvent = analyticsEventRepository.save(event);
         log.info("Saved follower event: {}", event);
-
+        return savedEvent;
     }
 
     @Override

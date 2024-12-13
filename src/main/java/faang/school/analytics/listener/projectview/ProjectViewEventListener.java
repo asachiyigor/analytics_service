@@ -14,15 +14,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProjectViewEventListener extends AbstractEventListener<ProjectViewEvent> implements MessageListener {
 
-    private final AnalyticsEventMapper analyticsEventMapper;
-    private final AnalyticsEventServiceImpl analyticsEventService;
 
     public ProjectViewEventListener(
             @Value("${spring.data.redis.channel.projects_view_channel.name}") String channelName,
             ObjectMapper objectMapper, AnalyticsEventMapper analyticsEventMapper, AnalyticsEventServiceImpl analyticsEventServiceImpl) {
-        super(channelName, objectMapper);
-        this.analyticsEventMapper = analyticsEventMapper;
-        this.analyticsEventService = analyticsEventServiceImpl;
+        super(channelName, objectMapper, analyticsEventServiceImpl, analyticsEventMapper);
     }
 
     @Override
@@ -30,7 +26,7 @@ public class ProjectViewEventListener extends AbstractEventListener<ProjectViewE
         handleEvent(message, ProjectViewEvent.class, event -> {
             AnalyticsEvent analEvent = analyticsEventMapper.fromProjectViewToAnalyticsEvent(event);
             analEvent.setEventType(EventType.PROJECT_VIEW);
-            analyticsEventService.saveEvent(analEvent);
+            System.out.println("Saved project view event: " + analyticsEventService.saveEvent(analEvent).getId());
         });
     }
 }
