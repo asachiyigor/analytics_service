@@ -1,10 +1,11 @@
 package faang.school.analytics.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import faang.school.analytics.client.UserServiceClient;
+import faang.school.analytics.mapper.AnalyticsEventMapper;
+import faang.school.analytics.service.AnalyticsEventService;
+import org.springframework.data.redis.connection.Message;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 
@@ -16,6 +17,8 @@ import java.util.function.Consumer;
 public abstract class AbstractEventListener<T> {
     private final String channelName;
     private final ObjectMapper objectMapper;
+    protected final AnalyticsEventService analyticsEventService;
+    protected final AnalyticsEventMapper analyticsEventMapper;
 
     protected void handleEvent(Message message, Class<T> eventClass, Consumer<T> consumer) {
         try {
