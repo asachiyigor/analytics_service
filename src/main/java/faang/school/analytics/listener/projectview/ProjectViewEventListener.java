@@ -6,11 +6,13 @@ import faang.school.analytics.mapper.AnalyticsEventMapper;
 import faang.school.analytics.model.AnalyticsEvent;
 import faang.school.analytics.model.EventType;
 import faang.school.analytics.service.AnalyticsEventServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.connection.Message;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 public class ProjectViewEventListener extends AbstractEventListener<ProjectViewEvent> implements MessageListener {
 
@@ -26,7 +28,8 @@ public class ProjectViewEventListener extends AbstractEventListener<ProjectViewE
         handleEvent(message, ProjectViewEvent.class, event -> {
             AnalyticsEvent analEvent = analyticsEventMapper.fromProjectViewToAnalyticsEvent(event);
             analEvent.setEventType(EventType.PROJECT_VIEW);
-            System.out.println("Saved project view event: " + analyticsEventService.saveEvent(analEvent).getId());
+            AnalyticsEvent savedEvent = analyticsEventService.saveEvent(analEvent);
+            log.info("Saved project view event: {}", savedEvent);
         });
     }
 }
