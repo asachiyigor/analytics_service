@@ -71,13 +71,15 @@ public class RedisConfig {
   @Bean
   RedisMessageListenerContainer redisMessageListenerContainer(
       RecommendationEventListener recommendationEventListener,
-      BoughtPremiumEventListener boughtPremiumEventListener) {
+      BoughtPremiumEventListener boughtPremiumEventListener,
+      MessageListenerAdapter fundRaisedEventListener) {
     RedisMessageListenerContainer container = new RedisMessageListenerContainer();
     container.setConnectionFactory(jedisConnectionFactory());
     container.addMessageListener(boughtPremiumListener(boughtPremiumEventListener),
         boughtPremiumChannelTopic());
     container.addMessageListener(recommendationListener(recommendationEventListener),
         recommendationChannelTopic());
+    container.addMessageListener(fundRaisedEventListener, topic());
     return container;
   }
 
@@ -90,12 +92,5 @@ public class RedisConfig {
     ChannelTopic topic() {
         return new ChannelTopic(fundRaisedTopic);
     }
-
-    @Bean
-    RedisMessageListenerContainer redisContainer(MessageListenerAdapter fundRaisedEventListener) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(jedisConnectionFactory());
-        container.addMessageListener(fundRaisedEventListener, topic());
-        return container;
-    }
+    
 }
