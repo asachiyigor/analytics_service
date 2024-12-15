@@ -11,7 +11,6 @@ import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
@@ -34,16 +33,6 @@ public class RedisConfig {
     }
 
     @Bean
-    RedisMessageListenerContainer redisMessageListenerContainer(JedisConnectionFactory jedisConnectionFactory) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(jedisConnectionFactory);
-        eventListeners.forEach(listener ->
-                container.addMessageListener(listener.getListenerAdapter(), listener.getChannelTopic()));
-        container.addMessageListener(fundRaisedEventListener, topic());
-        return container;
-    }
-
-    @Bean
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(jedisConnectionFactory());
@@ -60,5 +49,16 @@ public class RedisConfig {
     @Bean
     ChannelTopic topic() {
         return new ChannelTopic(fundRaisedTopic);
+    }
+
+    @Bean
+    RedisMessageListenerContainer redisMessageListenerContainer(JedisConnectionFactory jedisConnectionFactory,
+                                                                MessageListenerAdapter fundRaisedListener) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(jedisConnectionFactory);
+        eventListeners.forEach(listener ->
+                container.addMessageListener(listener.getListenerAdapter(), listener.getChannelTopic()));
+        container.addMessageListener(fundRaisedListener, topic());
+        return container;
     }
 }
