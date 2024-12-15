@@ -1,5 +1,7 @@
 package faang.school.analytics.config.redis;
 
+import faang.school.analytics.listener.BoughtPremiumEventListener;
+import faang.school.analytics.listener.RecommendationEventListener;
 import faang.school.analytics.listener.donation_analysis.FundRaisedEventListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,45 +16,82 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 public class RedisConfig {
-    @Value("${spring.data.redis.host}")
-    private String host;
 
-    @Value("${spring.data.redis.port}")
-    private int port;
+  @Value("${spring.data.redis.host}")
+  private String host;
 
-    @Value("${spring.data.redis.channels.name}")
-    private String fundRaisedTopic;
+  @Value("${spring.data.redis.port}")
+  private int port;
 
-    @Bean
-    public JedisConnectionFactory jedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
-        return new JedisConnectionFactory(config);
-    }
+  @Value("${spring.data.redis.channel.bought-premium}")
+  private String boughtPremiumChannelTopic;
 
-    @Bean
-    public RedisTemplate<String, Object> redisTemplate() {
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(jedisConnectionFactory());
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
-        return redisTemplate;
-    }
+  @Value("${spring.data.redis.channel.recommendation}")
+  private String recommendationChannelTopic;
 
-    @Bean
-    MessageListenerAdapter fundRaisedListener(FundRaisedEventListener fundRaisedEventListener) {
-        return new MessageListenerAdapter(fundRaisedEventListener);
-    }
+  @Bean
+  public JedisConnectionFactory jedisConnectionFactory() {
+    RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
+    return new JedisConnectionFactory(config);
+  }
 
-    @Bean
-    ChannelTopic topic() {
-        return new ChannelTopic(fundRaisedTopic);
-    }
+  @Value("${spring.data.redis.channels.name}")
+  private String fundRaisedTopic;
 
-    @Bean
-    RedisMessageListenerContainer redisContainer(MessageListenerAdapter fundRaisedEventListener) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(jedisConnectionFactory());
-        container.addMessageListener(fundRaisedEventListener, topic());
-        return container;
-    }
+  @Bean
+  public RedisTemplate<String, Object> redisTemplate() {
+    RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+    redisTemplate.setConnectionFactory(jedisConnectionFactory());
+    redisTemplate.setKeySerializer(new StringRedisSerializer());
+    redisTemplate.setValueSerializer(new StringRedisSerializer());
+    return redisTemplate;
+  }
+
+  @Bean
+  MessageListenerAdapter boughtPremiumListener(
+      BoughtPremiumEventListener boughtPremiumEventListener) {
+    return new MessageListenerAdapter(boughtPremiumEventListener);
+  }
+
+  @Bean
+  ChannelTopic boughtPremiumChannelTopic() {
+    return new ChannelTopic(boughtPremiumChannelTopic);
+  }
+
+  @Bean
+  MessageListenerAdapter recommendationListener(
+      RecommendationEventListener recommendationEventListener) {
+    return new MessageListenerAdapter(recommendationEventListener);
+  }
+
+  @Bean
+  ChannelTopic recommendationChannelTopic() {
+    return new ChannelTopic(recommendationChannelTopic);
+  }
+
+  @Bean
+  RedisMessageListenerContainer redisMessageListenerContainer(
+      RecommendationEventListener recommendationEventListener,
+      BoughtPremiumEventListener boughtPremiumEventListener,
+      MessageListenerAdapter fundRaisedEventListener) {
+    RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+    container.setConnectionFactory(jedisConnectionFactory());
+    container.addMessageListener(boughtPremiumListener(boughtPremiumEventListener),
+        boughtPremiumChannelTopic());
+    container.addMessageListener(recommendationListener(recommendationEventListener),
+        recommendationChannelTopic());
+    container.addMessageListener(fundRaisedEventListener, topic());
+    return container;
+  }
+
+  @Bean
+  MessageListenerAdapter fundRaisedListener(FundRaisedEventListener fundRaisedEventListener) {
+    return new MessageListenerAdapter(fundRaisedEventListener);
+  }
+
+  @Bean
+  ChannelTopic topic() {
+    return new ChannelTopic(fundRaisedTopic);
+  }
+
 }

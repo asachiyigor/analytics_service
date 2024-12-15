@@ -25,6 +25,8 @@ spring:
         name: fundRaised_topic
       channel:
         profile-view: profile_view_channel
+        bought-premium: bought_premium_channel
+        recommendation: recommendation_channel
 
 server:
   port: 8086
