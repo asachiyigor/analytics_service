@@ -2,6 +2,7 @@ package faang.school.analytics.config.redis;
 
 import faang.school.analytics.listener.BoughtPremiumEventListener;
 import faang.school.analytics.listener.RecommendationEventListener;
+import faang.school.analytics.listener.donation_analysis.FundRaisedEventListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +34,8 @@ public class RedisConfig {
     RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
     return new JedisConnectionFactory(config);
   }
+    @Value("${spring.data.redis.channels.name}")
+    private String fundRaisedTopic;
 
   @Bean
   public RedisTemplate<String, Object> redisTemplate() {
@@ -78,4 +81,21 @@ public class RedisConfig {
     return container;
   }
 
+    @Bean
+    MessageListenerAdapter fundRaisedListener(FundRaisedEventListener fundRaisedEventListener) {
+        return new MessageListenerAdapter(fundRaisedEventListener);
+    }
+
+    @Bean
+    ChannelTopic topic() {
+        return new ChannelTopic(fundRaisedTopic);
+    }
+
+    @Bean
+    RedisMessageListenerContainer redisContainer(MessageListenerAdapter fundRaisedEventListener) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(jedisConnectionFactory());
+        container.addMessageListener(fundRaisedEventListener, topic());
+        return container;
+    }
 }
