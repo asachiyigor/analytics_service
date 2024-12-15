@@ -12,16 +12,17 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public abstract class AbstractEventListener<T> {
-    protected final AnalyticsEventService analyticsEventService;
-    protected final AnalyticsEventMapper analyticsEventMapper;
-    protected final ObjectMapper objectMapper;
 
-    protected T handleEvent(Message message, Class<T> type) {
-        try {
-            return objectMapper.readValue(message.getBody(), type);
-        } catch (IOException e) {
-            log.error("Error deserializing JSON to object", e);
-            throw new RuntimeException("Error deserializing JSON to object", e);
-        }
+  protected final AnalyticsEventService analyticsEventService;
+  protected final AnalyticsEventMapper analyticsEventMapper;
+  protected final ObjectMapper objectMapper;
+
+  protected T handleEvent(Message message, Class<T> type) {
+    try {
+      return objectMapper.readValue(message.getBody(), type);
+    } catch (IOException e) {
+      log.error("Error deserializing JSON to object", e);
+      throw new RuntimeException("Error deserializing JSON to object", e);
     }
+  }
 }
