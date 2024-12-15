@@ -12,7 +12,4 @@ public class RedisProperties {
 
     @Value("${spring.data.redis.port}")
     private int port;
-
-    @Value("${spring.data.redis.channel.like-analytics-topic}")
-    private String likeAnalyticsTopic;
 }

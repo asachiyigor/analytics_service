@@ -14,7 +14,10 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class LikeEventListener extends AbstractEventListener<AnalyticsEventDto> implements MessageListener {
-    public LikeEventListener(AnalyticsEventService analyticsEventService, AnalyticsEventMapper analyticsEventMapper, ObjectMapper objectMapper) {
+    public LikeEventListener(
+            AnalyticsEventService analyticsEventService,
+            AnalyticsEventMapper analyticsEventMapper,
+            ObjectMapper objectMapper) {
         super(analyticsEventService, analyticsEventMapper, objectMapper);
     }
 
