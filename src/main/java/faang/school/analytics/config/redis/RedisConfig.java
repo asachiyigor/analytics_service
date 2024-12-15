@@ -1,8 +1,8 @@
 package faang.school.analytics.config.redis;
 
 import faang.school.analytics.listener.LikeEventListener;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -13,21 +13,15 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-@Configuration
 @Slf4j
+@Configuration
+@RequiredArgsConstructor
 public class RedisConfig {
-    @Value("${spring.data.redis.host}")
-    private String host;
-
-    @Value("${spring.data.redis.port}")
-    private int port;
-
-    @Value("${spring.data.redis.channel.like-analytics-topic}")
-    private String likeAnalyticsTopic;
+    private final RedisProperties redisProperties;
 
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(redisProperties.getHost(), redisProperties.getPort());
         return new JedisConnectionFactory(config);
     }
 
@@ -42,9 +36,11 @@ public class RedisConfig {
 
     @Bean
     public ChannelTopic channelTopicForLikeAnalytics() {
-        log.info("Creating ChannelTopic for Like Analytics with topic: {}", likeAnalyticsTopic);
-        return new ChannelTopic(likeAnalyticsTopic);
+        String topic = redisProperties.getLikeAnalyticsTopic();
+        log.info("Creating ChannelTopic for Like Analytics with topic: {}", topic);
+        return new ChannelTopic(topic);
     }
+
 
     @Bean
     MessageListenerAdapter messageListener(LikeEventListener likeEventListener) {
