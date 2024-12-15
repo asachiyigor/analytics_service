@@ -1,6 +1,7 @@
 package faang.school.analytics.config.redis;
 
 import faang.school.analytics.listener.BoughtPremiumEventListener;
+import faang.school.analytics.listener.RecommendationEventListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,6 +24,9 @@ public class RedisConfig {
 
   @Value("${spring.data.redis.channel.bought-premium}")
   private String boughtPremiumChannelTopic;
+
+  @Value("${spring.data.redis.channel.recommendation}")
+  private String recommendationChannelTopic;
 
   @Bean
   public JedisConnectionFactory jedisConnectionFactory() {
@@ -51,16 +55,26 @@ public class RedisConfig {
   }
 
   @Bean
-  RedisMessageListenerContainer redisBoughtPremiumListenerContainer(
-      MessageListenerAdapter adapter) {
-    return redisContainer(adapter, boughtPremiumChannelTopic());
+  MessageListenerAdapter recommendationListener(
+      RecommendationEventListener recommendationEventListener) {
+    return new MessageListenerAdapter(recommendationEventListener);
   }
 
-  private RedisMessageListenerContainer redisContainer(
-      MessageListenerAdapter adapter, ChannelTopic topic) {
+  @Bean
+  ChannelTopic recommendationChannelTopic() {
+    return new ChannelTopic(recommendationChannelTopic);
+  }
+
+  @Bean
+  RedisMessageListenerContainer redisMessageListenerContainer(
+      RecommendationEventListener recommendationEventListener,
+      BoughtPremiumEventListener boughtPremiumEventListener) {
     RedisMessageListenerContainer container = new RedisMessageListenerContainer();
     container.setConnectionFactory(jedisConnectionFactory());
-    container.addMessageListener(adapter, topic);
+    container.addMessageListener(boughtPremiumListener(boughtPremiumEventListener),
+        boughtPremiumChannelTopic());
+    container.addMessageListener(recommendationListener(recommendationEventListener),
+        recommendationChannelTopic());
     return container;
   }
 
