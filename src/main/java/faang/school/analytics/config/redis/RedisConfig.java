@@ -34,8 +34,9 @@ public class RedisConfig {
     RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
     return new JedisConnectionFactory(config);
   }
-    @Value("${spring.data.redis.channels.name}")
-    private String fundRaisedTopic;
+
+  @Value("${spring.data.redis.channels.name}")
+  private String fundRaisedTopic;
 
   @Bean
   public RedisTemplate<String, Object> redisTemplate() {
@@ -83,14 +84,14 @@ public class RedisConfig {
     return container;
   }
 
-    @Bean
-    MessageListenerAdapter fundRaisedListener(FundRaisedEventListener fundRaisedEventListener) {
-        return new MessageListenerAdapter(fundRaisedEventListener);
-    }
+  @Bean
+  MessageListenerAdapter fundRaisedListener(FundRaisedEventListener fundRaisedEventListener) {
+    return new MessageListenerAdapter(fundRaisedEventListener);
+  }
 
-    @Bean
-    ChannelTopic topic() {
-        return new ChannelTopic(fundRaisedTopic);
-    }
-    
+  @Bean
+  ChannelTopic topic() {
+    return new ChannelTopic(fundRaisedTopic);
+  }
+
 }
