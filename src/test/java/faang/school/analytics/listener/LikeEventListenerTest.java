@@ -2,6 +2,7 @@ package faang.school.analytics.listener;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import faang.school.analytics.dto.AnalyticsEventDto;
+import faang.school.analytics.dto.recommendation.RecommendationEventDto;
 import faang.school.analytics.mapper.AnalyticsEventMapper;
 import faang.school.analytics.model.AnalyticsEvent;
 import faang.school.analytics.model.EventType;
@@ -86,7 +87,7 @@ public class LikeEventListenerTest {
         Assertions.assertEquals("Error deserializing JSON to object", runtimeException.getMessage());
 
         verify(objectMapper, times(1)).readValue(body, AnalyticsEventDto.class);
-        verify(analyticsEventMapper, never()).toEntity(any());
+        verify(analyticsEventMapper, never()).toEntity(any(RecommendationEventDto.class));
         verify(analyticsEventService, never()).saveEvent(any());
     }
 }
