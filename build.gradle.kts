@@ -76,7 +76,9 @@ val jacocoInclude = listOf(
     "**/controller/**",
     "**/service/**",
     "**/validator/**",
-    "**/mapper/**"
+    "**/mapper/**",
+    "**/listener/**",
+
 )
 jacoco {
     toolVersion = "0.8.9"
