@@ -21,9 +21,13 @@ spring:
     redis:
       port: 6379
       host: localhost
+      channels:
+        name: fundRaised_topic
       channel:
         search-appearance-channel:
           name: search-appearance-event
+        bought-premium: bought_premium_channel
+        recommendation: recommendation_channel
 
 server:
   port: 8086

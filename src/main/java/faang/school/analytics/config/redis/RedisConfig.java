@@ -1,9 +1,9 @@
 package faang.school.analytics.config.redis;
 
+import faang.school.analytics.listener.BoughtPremiumEventListener;
+import faang.school.analytics.listener.RecommendationEventListener;
 import faang.school.analytics.listener.SearchAppearanceEventListener;
-import faang.school.analytics.mapper.AnalyticsEventMapper;
-import faang.school.analytics.service.AnalyticsEventService;
-import lombok.RequiredArgsConstructor;
+import faang.school.analytics.listener.donation_analysis.FundRaisedEventListener;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,16 +16,22 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
-@RequiredArgsConstructor
 public class RedisConfig {
-    private final AnalyticsEventMapper analyticsEventMapper;
-    private final AnalyticsEventService analyticsEventService;
 
     @Value("${spring.data.redis.host}")
     private String host;
 
     @Value("${spring.data.redis.port}")
     private int port;
+
+    @Value("${spring.data.redis.channel.bought-premium}")
+    private String boughtPremiumChannelTopic;
+
+    @Value("${spring.data.redis.channel.recommendation}")
+    private String recommendationChannelTopic;
+
+    @Value("${spring.data.redis.channels.name}")
+    private String fundRaisedTopic;
 
     @Value("${spring.data.redis.channel.search-appearance-channel.name}")
     private String searchAppearanceTopic;
@@ -46,8 +52,30 @@ public class RedisConfig {
     }
 
     @Bean
-    MessageListenerAdapter redisMessageListenerAdapter() {
-        return new MessageListenerAdapter(new SearchAppearanceEventListener(analyticsEventMapper, analyticsEventService));
+    MessageListenerAdapter boughtPremiumListener(
+            BoughtPremiumEventListener boughtPremiumEventListener) {
+        return new MessageListenerAdapter(boughtPremiumEventListener);
+    }
+
+    @Bean
+    ChannelTopic boughtPremiumChannelTopic() {
+        return new ChannelTopic(boughtPremiumChannelTopic);
+    }
+
+    @Bean
+    MessageListenerAdapter recommendationListener(
+            RecommendationEventListener recommendationEventListener) {
+        return new MessageListenerAdapter(recommendationEventListener);
+    }
+
+    @Bean
+    ChannelTopic recommendationChannelTopic() {
+        return new ChannelTopic(recommendationChannelTopic);
+    }
+
+    @Bean
+    MessageListenerAdapter searchAppearanceListener(SearchAppearanceEventListener searchAppearanceEventListener) {
+        return new MessageListenerAdapter(searchAppearanceEventListener);
     }
 
     @Bean
@@ -56,10 +84,29 @@ public class RedisConfig {
     }
 
     @Bean
-    RedisMessageListenerContainer redisContainer() {
+    MessageListenerAdapter fundRaisedListener(FundRaisedEventListener fundRaisedEventListener) {
+        return new MessageListenerAdapter(fundRaisedEventListener);
+    }
+
+    @Bean
+    ChannelTopic fundRaisedTopic() {
+        return new ChannelTopic(fundRaisedTopic);
+    }
+
+    @Bean
+    RedisMessageListenerContainer redisMessageListenerContainer(
+            SearchAppearanceEventListener searchAppearanceEventListener,
+            RecommendationEventListener recommendationEventListener,
+            BoughtPremiumEventListener boughtPremiumEventListener,
+            FundRaisedEventListener fundRaisedEventListener) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(jedisConnectionFactory());
-        container.addMessageListener(redisMessageListenerAdapter(), searchAppearanceTopic());
+        container.addMessageListener(boughtPremiumListener(boughtPremiumEventListener),
+                boughtPremiumChannelTopic());
+        container.addMessageListener(recommendationListener(recommendationEventListener),
+                recommendationChannelTopic());
+        container.addMessageListener(fundRaisedEventListener, fundRaisedTopic());
+        container.addMessageListener(searchAppearanceEventListener, searchAppearanceTopic());
         return container;
     }
 }
