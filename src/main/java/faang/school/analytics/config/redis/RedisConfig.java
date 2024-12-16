@@ -1,5 +1,7 @@
 package faang.school.analytics.config.redis;
 
+import faang.school.analytics.listener.BoughtPremiumEventListener;
+import faang.school.analytics.listener.RecommendationEventListener;
 import faang.school.analytics.listener.AbstractEventListener;
 import lombok.RequiredArgsConstructor;
 import faang.school.analytics.listener.donation_analysis.FundRaisedEventListener;
@@ -19,11 +21,16 @@ import java.util.List;
 @Configuration
 @RequiredArgsConstructor
 public class RedisConfig {
+
     private final RedisProperties redisProperties;
     private final List<AbstractEventListener<?>> eventListeners;
 
-    @Value("${spring.data.redis.channels.name}")
-    private String fundRaisedTopic;
+  @Value("${spring.data.redis.channel.bought-premium}")
+  private String boughtPremiumChannelTopic;
+
+  @Value("${spring.data.redis.channel.recommendation}")
+  private String recommendationChannelTopic;
+
 
     @Bean
     JedisConnectionFactory jedisConnectionFactory() {
@@ -31,6 +38,10 @@ public class RedisConfig {
                 new RedisStandaloneConfiguration(redisProperties.host(), redisProperties.port());
         return new JedisConnectionFactory(configuration);
     }
+
+  @Value("${spring.data.redis.channels.name}")
+  private String fundRaisedTopic;
+
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
@@ -41,24 +52,53 @@ public class RedisConfig {
         return redisTemplate;
     }
 
-    @Bean
-    MessageListenerAdapter fundRaisedListener(FundRaisedEventListener fundRaisedEventListener) {
-        return new MessageListenerAdapter(fundRaisedEventListener);
-    }
+  @Bean
+  MessageListenerAdapter boughtPremiumListener(
+      BoughtPremiumEventListener boughtPremiumEventListener) {
+    return new MessageListenerAdapter(boughtPremiumEventListener);
+  }
 
-    @Bean
-    ChannelTopic topic() {
-        return new ChannelTopic(fundRaisedTopic);
-    }
+  @Bean
+  ChannelTopic boughtPremiumChannelTopic() {
+    return new ChannelTopic(boughtPremiumChannelTopic);
+  }
 
-    @Bean
-    RedisMessageListenerContainer redisMessageListenerContainer(JedisConnectionFactory jedisConnectionFactory,
-                                                                MessageListenerAdapter fundRaisedListener) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(jedisConnectionFactory);
-        eventListeners.forEach(listener ->
-                container.addMessageListener(listener.getListenerAdapter(), listener.getChannelTopic()));
-        container.addMessageListener(fundRaisedListener, topic());
-        return container;
-    }
+  @Bean
+  MessageListenerAdapter recommendationListener(
+      RecommendationEventListener recommendationEventListener) {
+    return new MessageListenerAdapter(recommendationEventListener);
+  }
+
+  @Bean
+  ChannelTopic recommendationChannelTopic() {
+    return new ChannelTopic(recommendationChannelTopic);
+  }
+
+  @Bean
+  RedisMessageListenerContainer redisMessageListenerContainer(
+      RecommendationEventListener recommendationEventListener,
+      BoughtPremiumEventListener boughtPremiumEventListener,
+      MessageListenerAdapter fundRaisedEventListener) {
+    RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+    container.setConnectionFactory(jedisConnectionFactory());
+      eventListeners.forEach(listener ->
+              container.addMessageListener(listener.getListenerAdapter(), listener.getChannelTopic()));
+    container.addMessageListener(boughtPremiumListener(boughtPremiumEventListener),
+        boughtPremiumChannelTopic());
+    container.addMessageListener(recommendationListener(recommendationEventListener),
+        recommendationChannelTopic());
+    container.addMessageListener(fundRaisedEventListener, topic());
+    return container;
+  }
+
+  @Bean
+  MessageListenerAdapter fundRaisedListener(FundRaisedEventListener fundRaisedEventListener) {
+    return new MessageListenerAdapter(fundRaisedEventListener);
+  }
+
+  @Bean
+  ChannelTopic topic() {
+    return new ChannelTopic(fundRaisedTopic);
+  }
+
 }
