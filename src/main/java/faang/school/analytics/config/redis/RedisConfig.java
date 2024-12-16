@@ -2,7 +2,6 @@ package faang.school.analytics.config.redis;
 
 import faang.school.analytics.listener.BoughtPremiumEventListener;
 import faang.school.analytics.listener.LikeEventListener;
-import faang.school.analytics.listener.LikeEventListener;
 import faang.school.analytics.listener.RecommendationEventListener;
 import faang.school.analytics.listener.SearchAppearanceEventListener;
 import faang.school.analytics.listener.donation_analysis.FundRaisedEventListener;
@@ -40,7 +39,6 @@ public class RedisConfig {
 
     @Value("${spring.data.redis.channel.like-analytics-topic}")
     private String likeEventChannelTopic;
-
 
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
@@ -108,7 +106,6 @@ public class RedisConfig {
     public ChannelTopic LikeEventChannelTopic() {
         return new ChannelTopic(likeEventChannelTopic);
     }
-
 
     @Bean
     RedisMessageListenerContainer redisMessageListenerContainer(
