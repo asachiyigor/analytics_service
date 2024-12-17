@@ -1,6 +1,7 @@
 package faang.school.analytics.config.redis;
 
 import faang.school.analytics.listener.BoughtPremiumEventListener;
+import faang.school.analytics.listener.LikeEventListener;
 import faang.school.analytics.listener.RecommendationEventListener;
 import faang.school.analytics.listener.SearchAppearanceEventListener;
 import faang.school.analytics.listener.donation_analysis.FundRaisedEventListener;
@@ -35,6 +36,9 @@ public class RedisConfig {
 
     @Value("${spring.data.redis.channel.search-appearance-channel.name}")
     private String searchAppearanceTopic;
+
+    @Value("${spring.data.redis.channel.like-analytics-topic}")
+    private String likeEventChannelTopic;
 
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
@@ -94,11 +98,22 @@ public class RedisConfig {
     }
 
     @Bean
+    MessageListenerAdapter likeListener(LikeEventListener likeEventListener) {
+        return new MessageListenerAdapter(likeEventListener);
+    }
+
+    @Bean
+    public ChannelTopic LikeEventChannelTopic() {
+        return new ChannelTopic(likeEventChannelTopic);
+    }
+
+    @Bean
     RedisMessageListenerContainer redisMessageListenerContainer(
             SearchAppearanceEventListener searchAppearanceEventListener,
             RecommendationEventListener recommendationEventListener,
             BoughtPremiumEventListener boughtPremiumEventListener,
-            FundRaisedEventListener fundRaisedEventListener) {
+            FundRaisedEventListener fundRaisedEventListener,
+            LikeEventListener likeEventListener) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(jedisConnectionFactory());
         container.addMessageListener(boughtPremiumListener(boughtPremiumEventListener),
@@ -107,6 +122,8 @@ public class RedisConfig {
                 recommendationChannelTopic());
         container.addMessageListener(fundRaisedEventListener, fundRaisedTopic());
         container.addMessageListener(searchAppearanceEventListener, searchAppearanceTopic());
+        container.addMessageListener(likeListener(likeEventListener),
+                LikeEventChannelTopic());
         return container;
     }
 }

@@ -28,6 +28,7 @@ spring:
           name: search-appearance-event
         bought-premium: bought_premium_channel
         recommendation: recommendation_channel
+        like-analytics-topic: like_analytics
 
 server:
   port: 8086
