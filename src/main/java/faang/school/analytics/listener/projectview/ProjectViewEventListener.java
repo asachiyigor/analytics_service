@@ -19,7 +19,9 @@ public class ProjectViewEventListener extends AbstractEventListener<ProjectViewE
 
     public ProjectViewEventListener(
             @Value("${spring.data.redis.channel.projects_view_channel.name}") String channelName,
-            ObjectMapper objectMapper, AnalyticsEventMapper analyticsEventMapper, AnalyticsEventServiceImpl analyticsEventServiceImpl) {
+            ObjectMapper objectMapper,
+            AnalyticsEventMapper analyticsEventMapper,
+            AnalyticsEventServiceImpl analyticsEventServiceImpl) {
         super(channelName, objectMapper, analyticsEventServiceImpl, analyticsEventMapper);
     }
 

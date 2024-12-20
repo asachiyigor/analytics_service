@@ -1,10 +1,7 @@
 package faang.school.analytics.config.redis;
 
-import faang.school.analytics.listener.BoughtPremiumEventListener;
-import faang.school.analytics.listener.LikeEventListener;
-import faang.school.analytics.listener.RecommendationEventListener;
-import faang.school.analytics.listener.SearchAppearanceEventListener;
 import faang.school.analytics.listener.AbstractEventListener;
+import faang.school.analytics.listener.SearchAppearanceEventListener;
 import faang.school.analytics.listener.donation_analysis.FundRaisedEventListener;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +34,9 @@ public class RedisConfig {
     @Value("${spring.data.redis.channels.name}")
     private String fundRaisedTopic;
 
+    @Value("${spring.data.redis.channel.search-appearance-channel.name}")
+    private String searchAppearanceTopic;
+
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
@@ -50,7 +50,6 @@ public class RedisConfig {
     @Bean
     RedisMessageListenerContainer redisMessageListenerContainer(
             SearchAppearanceEventListener searchAppearanceEventListener,
-            LikeEventListener likeEventListener,
             MessageListenerAdapter fundRaisedListener) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(jedisConnectionFactory());
@@ -58,8 +57,6 @@ public class RedisConfig {
                 container.addMessageListener(listener.getListenerAdapter(), listener.getChannelTopic()));
         container.addMessageListener(fundRaisedListener, topic());
         container.addMessageListener(searchAppearanceEventListener, searchAppearanceTopic());
-        container.addMessageListener(likeListener(likeEventListener),
-                LikeEventChannelTopic());
         return container;
     }
 
@@ -71,16 +68,6 @@ public class RedisConfig {
     @Bean
     ChannelTopic topic() {
         return new ChannelTopic(fundRaisedTopic);
-    }
-
-    @Bean
-    MessageListenerAdapter likeListener(LikeEventListener likeEventListener) {
-        return new MessageListenerAdapter(likeEventListener);
-    }
-
-    @Bean
-    public ChannelTopic LikeEventChannelTopic() {
-        return new ChannelTopic(likeEventChannelTopic);
     }
 
     @Bean
