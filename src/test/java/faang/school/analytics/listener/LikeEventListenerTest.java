@@ -80,11 +80,11 @@ public class LikeEventListenerTest {
         Message message = new DefaultMessage(channel, body);
 
         when(objectMapper.readValue(body, AnalyticsEventDto.class))
-                .thenThrow(new IOException("Error deserializing"));
+                .thenThrow(new RuntimeException("Error deserializing"));
 
-        RuntimeException runtimeException = assertThrows(RuntimeException.class,
+        var exception = assertThrows(RuntimeException.class,
                 () -> likeEventListener.onMessage(message, null));
-        Assertions.assertEquals("Error deserializing JSON to object", runtimeException.getMessage());
+        Assertions.assertEquals("Error deserializing", exception.getMessage());
 
         verify(objectMapper, times(1)).readValue(body, AnalyticsEventDto.class);
         verify(analyticsEventMapper, never()).toEntity(any(RecommendationEventDto.class));

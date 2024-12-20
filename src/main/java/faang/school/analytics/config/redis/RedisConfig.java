@@ -1,10 +1,9 @@
 package faang.school.analytics.config.redis;
 
-import faang.school.analytics.listener.BoughtPremiumEventListener;
-import faang.school.analytics.listener.LikeEventListener;
-import faang.school.analytics.listener.RecommendationEventListener;
+import faang.school.analytics.listener.AbstractEventListener;
 import faang.school.analytics.listener.SearchAppearanceEventListener;
 import faang.school.analytics.listener.donation_analysis.FundRaisedEventListener;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,20 +15,21 @@ import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.util.List;
+
 @Configuration
+@RequiredArgsConstructor
 public class RedisConfig {
 
-    @Value("${spring.data.redis.host}")
-    private String host;
+    private final RedisProperties redisProperties;
+    private final List<AbstractEventListener<?>> eventListeners;
 
-    @Value("${spring.data.redis.port}")
-    private int port;
-
-    @Value("${spring.data.redis.channel.bought-premium}")
-    private String boughtPremiumChannelTopic;
-
-    @Value("${spring.data.redis.channel.recommendation}")
-    private String recommendationChannelTopic;
+    @Bean
+    JedisConnectionFactory jedisConnectionFactory() {
+        RedisStandaloneConfiguration configuration =
+                new RedisStandaloneConfiguration(redisProperties.host(), redisProperties.port());
+        return new JedisConnectionFactory(configuration);
+    }
 
     @Value("${spring.data.redis.channels.name}")
     private String fundRaisedTopic;
@@ -37,44 +37,37 @@ public class RedisConfig {
     @Value("${spring.data.redis.channel.search-appearance-channel.name}")
     private String searchAppearanceTopic;
 
-    @Value("${spring.data.redis.channel.like-analytics-topic}")
-    private String likeEventChannelTopic;
-
-    @Bean
-    public JedisConnectionFactory jedisConnectionFactory() {
-        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration(host, port);
-        return new JedisConnectionFactory(config);
-    }
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(jedisConnectionFactory());
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        redisTemplate.setDefaultSerializer(new StringRedisSerializer());
+        redisTemplate.afterPropertiesSet();
         return redisTemplate;
     }
 
     @Bean
-    MessageListenerAdapter boughtPremiumListener(
-            BoughtPremiumEventListener boughtPremiumEventListener) {
-        return new MessageListenerAdapter(boughtPremiumEventListener);
+    RedisMessageListenerContainer redisMessageListenerContainer(
+            SearchAppearanceEventListener searchAppearanceEventListener,
+            MessageListenerAdapter fundRaisedListener) {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(jedisConnectionFactory());
+        eventListeners.forEach(listener ->
+                container.addMessageListener(listener.getListenerAdapter(), listener.getChannelTopic()));
+        container.addMessageListener(fundRaisedListener, topic());
+        container.addMessageListener(searchAppearanceEventListener, searchAppearanceTopic());
+        return container;
     }
 
     @Bean
-    ChannelTopic boughtPremiumChannelTopic() {
-        return new ChannelTopic(boughtPremiumChannelTopic);
+    MessageListenerAdapter fundRaisedListener(FundRaisedEventListener fundRaisedEventListener) {
+        return new MessageListenerAdapter(fundRaisedEventListener);
     }
 
     @Bean
-    MessageListenerAdapter recommendationListener(
-            RecommendationEventListener recommendationEventListener) {
-        return new MessageListenerAdapter(recommendationEventListener);
-    }
-
-    @Bean
-    ChannelTopic recommendationChannelTopic() {
-        return new ChannelTopic(recommendationChannelTopic);
+    ChannelTopic topic() {
+        return new ChannelTopic(fundRaisedTopic);
     }
 
     @Bean
@@ -85,45 +78,5 @@ public class RedisConfig {
     @Bean
     public ChannelTopic searchAppearanceTopic() {
         return new ChannelTopic(searchAppearanceTopic);
-    }
-
-    @Bean
-    MessageListenerAdapter fundRaisedListener(FundRaisedEventListener fundRaisedEventListener) {
-        return new MessageListenerAdapter(fundRaisedEventListener);
-    }
-
-    @Bean
-    ChannelTopic fundRaisedTopic() {
-        return new ChannelTopic(fundRaisedTopic);
-    }
-
-    @Bean
-    MessageListenerAdapter likeListener(LikeEventListener likeEventListener) {
-        return new MessageListenerAdapter(likeEventListener);
-    }
-
-    @Bean
-    public ChannelTopic LikeEventChannelTopic() {
-        return new ChannelTopic(likeEventChannelTopic);
-    }
-
-    @Bean
-    RedisMessageListenerContainer redisMessageListenerContainer(
-            SearchAppearanceEventListener searchAppearanceEventListener,
-            RecommendationEventListener recommendationEventListener,
-            BoughtPremiumEventListener boughtPremiumEventListener,
-            FundRaisedEventListener fundRaisedEventListener,
-            LikeEventListener likeEventListener) {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(jedisConnectionFactory());
-        container.addMessageListener(boughtPremiumListener(boughtPremiumEventListener),
-                boughtPremiumChannelTopic());
-        container.addMessageListener(recommendationListener(recommendationEventListener),
-                recommendationChannelTopic());
-        container.addMessageListener(fundRaisedEventListener, fundRaisedTopic());
-        container.addMessageListener(searchAppearanceEventListener, searchAppearanceTopic());
-        container.addMessageListener(likeListener(likeEventListener),
-                LikeEventChannelTopic());
-        return container;
     }
 }

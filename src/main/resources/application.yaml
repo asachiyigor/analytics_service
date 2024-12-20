@@ -29,6 +29,8 @@ spring:
         bought-premium: bought_premium_channel
         recommendation: recommendation_channel
         like-analytics-topic: like_analytics
+        projects_view_channel:
+          name: projects_view_channel
 
 server:
   port: 8086
@@ -40,3 +42,7 @@ logging:
 project-service:
   host: localhost
   port: 8082
+
+user-service:
+  host: localhost
+  port: 8080

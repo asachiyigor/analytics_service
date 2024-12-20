@@ -26,11 +26,12 @@ public class AnalyticsEventServiceImpl implements AnalyticsEventService {
   private final AnalyticsEventMapper analyticEventMapper;
   private final AnalyticsEventRepository analyticsEventRepository;
 
-  @Override
-  public void saveEvent(AnalyticsEvent event) {
-    analyticsEventRepository.save(event);
-    log.info("Saved analytics data into DB: {}", event);
-  }
+    @Override
+    public AnalyticsEvent saveEvent(AnalyticsEvent event) {
+        AnalyticsEvent savedEvent = analyticsEventRepository.save(event);
+        log.info("Saved follower event: {}", event);
+        return savedEvent;
+    }
 
   @Override
   public List<AnalyticsEventDto> getAnalytics(long receiverId, EventType eventType,

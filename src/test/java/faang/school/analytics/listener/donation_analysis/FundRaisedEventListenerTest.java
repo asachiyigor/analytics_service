@@ -48,7 +48,7 @@ public class FundRaisedEventListenerTest {
         byte[] messageBody = "{\"userId\":1,\"amount\":100,\"timestamp\":\"2024-12-11T10:00:00\"}".getBytes();
         when(message.getBody()).thenReturn(messageBody);
 
-        FundRaisedEvent event = new FundRaisedEvent(1L, BigDecimal.valueOf(1), EventType.POST_VIEW, LocalDateTime.now());
+        FundRaisedEvent event = new FundRaisedEvent(1L, BigDecimal.valueOf(1), LocalDateTime.now());
         when(objectMapper.readValue(messageBody, FundRaisedEvent.class)).thenReturn(event);
 
         AnalyticsEvent analyticsEvent = new AnalyticsEvent();

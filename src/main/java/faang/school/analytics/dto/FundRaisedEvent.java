@@ -22,7 +22,7 @@ public class FundRaisedEvent {
     @NotNull
     private BigDecimal amount;
 
-    private EventType eventType = EventType.POST_VIEW;
+    private final EventType eventType = EventType.POST_VIEW;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime donationTime;
