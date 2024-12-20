@@ -24,9 +24,11 @@ spring:
       channels:
         name: fundRaised_topic
       channel:
-        profile-view: profile_view_channel
+        search-appearance-channel:
+          name: search-appearance-event
         bought-premium: bought_premium_channel
         recommendation: recommendation_channel
+        like-analytics-topic: like_analytics
         projects_view_channel:
           name: projects_view_channel
 
