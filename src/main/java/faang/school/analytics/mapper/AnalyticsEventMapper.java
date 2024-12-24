@@ -1,5 +1,6 @@
 package faang.school.analytics.mapper;
 
+import faang.school.analytics.dto.AdBoughtEventDto;
 import faang.school.analytics.dto.AnalyticsEventDto;
 import faang.school.analytics.listener.projectview.ProjectViewEvent;
 import faang.school.analytics.dto.FundRaisedEvent;
@@ -42,4 +43,9 @@ public interface AnalyticsEventMapper {
     @Mapping(target = "actorId", source = "requesterId")
     @Mapping(target = "eventType", expression = "java(EventType.PROFILE_APPEARED_IN_SEARCH)")
     AnalyticsEvent toEntity(SearchAppearanceEventDto searchAppearanceEventDto);
+
+    @Mapping(target = "receiverId", source = "postId")
+    @Mapping(target = "actorId", source = "userId")
+    @Mapping(target = "receivedAt", source = "boughtAt")
+    AnalyticsEvent toEntity(AdBoughtEventDto adBoughtEventDto);
 }
