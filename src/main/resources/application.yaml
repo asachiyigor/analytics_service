@@ -31,6 +31,8 @@ spring:
         like-analytics-topic: like_analytics
         projects_view_channel:
           name: projects_view_channel
+        ad-bought-channel:
+          name: ad_bought_channel
 
 server:
   port: 8086

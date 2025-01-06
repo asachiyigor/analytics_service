@@ -33,4 +33,3 @@ public class LikeEventListener extends AbstractEventListener<AnalyticsEventDto> 
         });
     }
 }
-

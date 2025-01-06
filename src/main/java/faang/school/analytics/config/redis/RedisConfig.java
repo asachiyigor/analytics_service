@@ -1,6 +1,7 @@
 package faang.school.analytics.config.redis;
 
 import faang.school.analytics.listener.AbstractEventListener;
+import faang.school.analytics.listener.AdBoughtEventListener;
 import faang.school.analytics.listener.SearchAppearanceEventListener;
 import faang.school.analytics.listener.donation_analysis.FundRaisedEventListener;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,8 @@ public class RedisConfig {
     @Value("${spring.data.redis.channel.search-appearance-channel.name}")
     private String searchAppearanceTopic;
 
+    @Value("${spring.data.redis.channel.ad-bought-channel.name}")
+    private String adBoughtEvent;
 
     @Bean
     public RedisTemplate<String, Object> redisTemplate() {
@@ -50,13 +53,15 @@ public class RedisConfig {
     @Bean
     RedisMessageListenerContainer redisMessageListenerContainer(
             SearchAppearanceEventListener searchAppearanceEventListener,
-            MessageListenerAdapter fundRaisedListener) {
+            MessageListenerAdapter fundRaisedListener,
+            MessageListenerAdapter adBoughtListener) {
         RedisMessageListenerContainer container = new RedisMessageListenerContainer();
         container.setConnectionFactory(jedisConnectionFactory());
         eventListeners.forEach(listener ->
                 container.addMessageListener(listener.getListenerAdapter(), listener.getChannelTopic()));
         container.addMessageListener(fundRaisedListener, topic());
         container.addMessageListener(searchAppearanceEventListener, searchAppearanceTopic());
+        container.addMessageListener(adBoughtListener, adBoughtTopic());
         return container;
     }
 
@@ -78,5 +83,15 @@ public class RedisConfig {
     @Bean
     public ChannelTopic searchAppearanceTopic() {
         return new ChannelTopic(searchAppearanceTopic);
+    }
+
+    @Bean
+    MessageListenerAdapter adBoughtListener(AdBoughtEventListener adBoughtEventListener) {
+        return new MessageListenerAdapter(adBoughtEventListener);
+    }
+
+    @Bean
+    ChannelTopic adBoughtTopic() {
+        return new ChannelTopic(adBoughtEvent);
     }
 }
